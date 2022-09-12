@@ -1,0 +1,49 @@
+1) angular disable the validators by default and therefore to enable it we can add ngNativeValidate into our template.
+
+2) required -> self explainatory
+3) email (validator) -> for email input forms
+
+4) add [disable]="!f.vaild" here f == local variable intiated at form ; only the button will enable
+
+5) in-built css class;
+input.ng-invalid.ng-touched -> applies on input only when touched and filled incorrectly
+
+6) on input add #email_local = "ngModel" ; we can add warning simply by 
+span class="help-block" *ngIf="!email_local.vaild && email_local.touched"
+will only show when input form touched and entered incorrectly
+
+7) [ngModel]="defaultQuestion" ; defaultQuestion:string='pet' 
+it will automatically select the option provided
+
+8) add the ngModel where the input and select tags are present ; on form tag add the (ngSubmit)="onSubmit()" #f=NgForm
+
+9)  <div class="form-group">
+          <textarea name="questionAnswer" rows="3" [(ngModel)]="answer" class="form-control"></textarea>
+    </div>
+    <p> your reply: {{answer}}</p>
+here we did 2-way binding by initializing the answer variable in .ts file and it will also be reflected inside the value of form submitted.
+
+10)We can do grouping by using in-buit ngModelGroup on tag and assign it to any string variable ; we can access it by declaring the local variable say for example , #userData="ngModelGroup" and now we can apply *ngIf="!userData.valid && userData.touched"
+
+10) radio button -> for gender ['male','female'] ; 
+div class radio and *ngFor looping over array of options
+label
+input class=form-control name="gender" [value]="gender" [ngModel]="genders[0]" required
+
+11) suggest a name button we can use this button to suggest the standard option throughout the form
+only changes in html -> (click)="functionName()"
+changes in ts -> functionName(){ const suggestName:string='superUser'
+this.signupForm.setValue    userData:{ username:suggestName, email:'' }
+secret:'pet', questionAnswer:'', gender:genders[1]  })}
+this above do the work as suggested whenever the we click the button it will change the whole/overwrite respective form.
+
+12)comment the whole above code we want to only suggest name code ->
+this.signupForm.form.patchValue({ userData : {  username:suggested  } })
+now above code will only change the input which are intended
+
+13)displaying / submitting data 
+changes in ts file
+create an object user={ username:'',email:'',.....} -> these variable can be different from assign variable which we want to save 
+onsubmit(){ this.user.username = this.signupForm.value.userData.username } -> userData is only when we grouped them else the name property in html input tag for each field where we input user response
+
+14) to reset the form to initial form -> on same function where we perform the assign work simply write below this.signupForm.reset()
