@@ -1,0 +1,215 @@
+section 15 : Template driven form
+
+==================================================================
+
+186. Example form
+
+In Angular we don't submit the http request on form submission.
+Angular handle the form create an JS object which contains multiple key value pairs, like 
+{
+    name:'Anubhav', 
+    address:'xyz'
+}
+it will eventaully get submitted.
+
+187. creating the forms and registering the controls
+
+In app.module.ts import the FormsModule.
+Angular will not detect the <input> automatically, we have to make it aware.
+add the NgModel (without parenthesis and sqaure bracket) in the input tags for which we want the value inside the form.
+next thing we will do is add name="input-name" so that with name & NgModel our JS object will be complete.
+<input class="....." type="....." id="....." NgModel name="variable-name" >
+same goes for the select tag also it does drop values.
+
+188. submitting and using form
+
+lets create a new method inside the form ts file, named onSubmit().
+To call this function, on may think we need to class this on button tag which of type submit. But it's not correct buttons are used to submit events and request.
+Angular gives us built in directive called ngSubmit, which need to bind with function inside the ts file. When we submit the form using the button by default whole form will be submitted.
+(ngSubmit)="onSubmit()"
+to access the element/JS object of the form we need to assign the local variable in template.
+
+<form (ngSubmit)="onSubmit(form_local_variable) #form_local_variable"
+
+onSubmit(form:HTMLFormElement){
+    console.log(form) // we can now see the form JS object which are similar to html object when we select any element inside the html using JS DOM properties
+}
+
+In order to really see the values inside the form we need to one more modification to code.
+Assign the form_local_variable = "ngForm" and inside the ts file form input variable type will be ngForm instead of HTMLFormElement.
+
+form_local_variable = "ngForm" (ngSubmit)="onSubmit(form_local_variable)"
+
+onSubmit(form:ngForm){ ... }
+
+And values will inside the form.value -> JS object, like shown below
+{
+    name:'Anubhav', 
+    address:'xyz'
+}
+
+189. Understanding the form state
+
+As the form which is submitted is JS object, but the values we submitted are inside form.value.
+Besides this angular(ngForm) offer many other things like controls for each form input like dirty(if the form is touched and value input by user), disabled(if the form field is disabled),error(what is kind of error message)etc.
+
+190. Acessing the form using the @ViewChild()
+
+Quick reminder, ViewChild(is a decorator) allows us to access the local reference inside the template.
+
+few things to update:
+1st -> inside the template remove the form_local_variable argument from onSubmit method.
+2nd -> import the @ViewChild
+3rd declare like -> @ViewChild('form_local_variable') signupForm:ngForm
+here signupForm is variable name for whole form and ngForm is dataType of it.
+
+191. Adding validation to check user input
+
+required -> when added in form field then it is must to fill the form.
+email -> when added in form field then format of input field must match the standard email format.
+All these above thing is directive.
+If email field is not filled with correct value then form.valid = false.
+3 classes are added upon the form manipulation -> ng-dirty, ng-touched and ng-valid.
+If form input is not valid then in place of ng-valid we will have ng-invalid.
+
+192. Using the html5 validation and built in directive.
+
+https://angular.io/api?type=directive
+
+by default angular has disabled the html6 directive which can be enbabled simply bu using the *ngNativeValidate*
+
+193. Using the form-state
+
+To disable the button form upon invalid input, we can use the property binding
+[disabled]="!form_local_variable.valid"
+we use the css class to make input form field red border, we using the angular like ->
+
+.ng-invalid{
+    border:1px solid red,
+}
+
+but the above appraoch will apply the css on whole fields and therefore we need to specific.
+
+input.ng-invalid select.ng-invalid { ... }
+
+but again without even right we will have red border which is not great therefore we will use the another dynamic angular class .ng-touched
+
+input.ng-invalid.ng-touched select.ng-invalid.ng-touched { ... }
+
+194. outputing the validation error message
+
+add another local variable in the form field tag.
+<input #local_variable_for_input ="ngModel" ...... />
+and now we can access the local_variable_for_input.valid /.touched etc
+
+195. set deafult values ngModel property binding
+
+ngModel="value" -> will pre-populate the input fields.
+for select tag ngModel="some variable inside the ts file" and that value could be equal to any one of the select option, which could lead to selected html template.
+for Example -> 
+
+<select id="secret" class="form-control" [ngModel]="defaultQuestion" name="secret">
+
+196. using the ngModel for 2 way data binding
+
+<div class="form-group">
+<textarea name="questionAnswer" rows="3" [(ngModel)]="answer" class="form-control"></textarea>
+</div>
+<p> your reply: {{answer}}</p>
+
+here we are taking the input and also showing it we have written, and ofcourse we will have this inside the created JS object with answer as key and data entered as value.
+
+197. grouping the form-control
+
+As of now we have fields like name, email, secret question and answer key inside the key value of JS object.
+It is the small form field for bigger one we need to group them like->
+
+{
+    userData:{
+        name:'',
+        email:''
+    },
+    secretQuestions:'',
+    answer:''
+}
+
+In order to above thing we need the ngModelGroup directive, to be place in above div which we want to group. Like below -> 
+
+<div ngModelGroup="userData" #userData="ngModelGroup">
+
+here we can also check the validation and touched nature of formgroup like before.
+
+198. handling radio button
+
+to [ngModel]=" ... " -> used to show data
+
+<div class="radio" *ngFor="let gender of genders">
+<label>
+<input type="radio" name="gender" [value]="gender" [ngModel]="genders[0]" required>{{gender}}
+</label>
+</div>
+
+only 2 extra thing were needed , for input type="radio" and [value] to show case the data for looping.
+
+199. setting and patching form values
+
+suppose we want to give the functionality where we want to use to give the suggested names, we can use the @ViewChild variable signupForm.
+
+first method ->
+
+onClickListener(){
+    const suggestedName='testServer'
+    this.signupForm.setValue({
+        userData:{
+            name:suggestedName,
+            email:''
+        },
+        secret:'pet',
+        ....
+        ....
+    })
+}
+
+here in this above approach we will get the value of user suggestedName but only one problem it will override the data which we may had entered earlier.
+
+note : key name must remain same as input field names else error.
+
+second method ->
+
+onClickListener(){
+    const suggestedName='testServer'
+    this.signupForm.form.patchValue({
+        userData:{
+            name:suggestedName
+        }
+    })
+}
+
+here by above approach only the value we give will be altered, not others.
+
+200. using the form data
+
+user = {
+    username: '',
+    email: '',
+    secretQuestion: '',
+    questionAnswer: '',
+    gender: ''
+  }
+
+here we created the user JS object with the empty values.
+The value we gather will now be save to these variables and important thing to note is JS object created by user inside the ts file should be simple not necessarily match the structure of the form and name of variables inside the JS object -> not necessarily match name property inside the input tag.
+
+onSubmit() {
+    this.submitted = true
+    this.user.username = this.signupForm.value.userData.username
+    this.user.email = this.signupForm.value.userData.email
+    this.user.questionAnswer = this.signupForm.value.questionAnswer
+    this.user.gender = this.signupForm.value.gender
+    this.user.secretQuestion = this.signupForm.value.secret
+
+    this.signupForm.reset()
+}
+
+here we are saving the data from the template to ts file JS objects. 
+To access the form input we will use the ViewChild variable as shown abpve and here the property name should match to the templete property.
